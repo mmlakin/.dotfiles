@@ -58,20 +58,16 @@ function install_package {
   local package=$1
   if [[ -x "$(command -v brew)" ]]; then
     # os x
-    if [[ $1 == 'python3-pip' ]]; then
-      : # no-op
-    else
-      brew install $1
-    fi
+    brew install $package
   elif [[ -x "$(command -v zypper)" ]]; then
     # openSUSE
-    sudo zypper install $1
+    sudo zypper install $package
   elif [[ -x "$(command -v apt-get)" ]]; then
     # ubuntu
-    sudo apt-get install $1
+    sudo apt-get install $package
   else
     # TODO: determine installer based on OS
-    error  "Sorry, I can't determine default package manager! Please install $1 manually & run this script again."
+    error  "Sorry, I can't determine default package manager! Please install $package manually & run this script again."
   fi
 }
 
@@ -90,8 +86,12 @@ function install_softwares {
   check_software tmux
   check_software vim
   check_software python3
-  check_software python3-pip
-  check_software neovim
+  if [[ $uname_os = "Darwin" ]]; then    # macOS only:
+    check_software nvim
+  elif [[ $uname_os = "Linux" ]]; then   # Linux only:
+    check_software python3-pip
+    check_software neovim
+  fi
   pip3 install --user --upgrade pynvim
   check_software ruby
   check_software fasd
