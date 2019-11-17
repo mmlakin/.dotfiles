@@ -67,7 +67,12 @@ function install_package {
     sudo apt-get install $package
   else
     # TODO: determine installer based on OS
-    error  "Sorry, I can't determine default package manager! Please install $package manually & run this script again."
+    if [[ $uname_os = "Darwin" ]]; then
+      local errmsg = "This deploy script requires Homebrew to work on MacOS.  Please install Homebrew from https://brew.sh "
+    else
+      local errmsg = "Sorry, I couldn't find a supported package manager for your OS: $uname_os.  Please install $package manually & run this script again."
+    error $errmsg
+    fi
   fi
 }
 
