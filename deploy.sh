@@ -54,26 +54,40 @@ function yn_prompt {
   fi
 }
 
-function install_package {
-  local package=$1
-  if [[ -x "$(command -v brew)" ]]; then
-    # os x
-    brew install $package
-  elif [[ -x "$(command -v zypper)" ]]; then
-    # openSUSE
-    sudo zypper install $package
-  elif [[ -x "$(command -v apt-get)" ]]; then
-    # ubuntu
-    sudo apt-get install $package
-  else
-    # TODO: determine installer based on OS
-    if [[ $uname_os = "Darwin" ]]; then
-      local errmsg = "This deploy script requires Homebrew to work on MacOS.  Please install Homebrew from https://brew.sh "
+function check_os {
+  uname_os=$(uname -s)
+  if [[ $uname_os = "Darwin" ]]; then
+    os=macos
+    if [[ -x "$(command -v brew)" ]]; then
+      pkg_mgr_install="brew install"
     else
-      local errmsg = "Sorry, I couldn't find a supported package manager for your OS: $uname_os.  Please install $package manually & run this script again."
-    error $errmsg
+      error "For MacOS, this deploy script requires Homebrew.  Please install Homebrew from https://brew.sh or install $package manually & run this script again."
+    fi
+  elif [[ $uname_os = "Linux" ]]; then
+    os=linux
+    if [[ -x "$(command -v zypper)" ]]; then
+      pkg_mgr_install="sudo zypper install"   # openSUSE
+    elif [[ -x "$(command -v apt-get)" ]]; then
+      pkg_mgr_install="sudo apt-get install"  # Ubuntu, Debian, or equivalent
+    else
+      error "For Linux, this deploy script only supports zypper or apt-get package managers.  Please install $package manually & run this script again."
     fi
   fi
+}
+
+function install_package {
+  local package=$1
+
+  if [[ $os = "linux" ]]; then
+    if [[ $package = "nvim" ]]; then
+      package="neovim"
+    elif [[ $package = "pip3" ]]; then
+      package="python3-pip"
+    fi
+  fi
+
+  # Install package using detected package manager:
+  $pkg_mgr_install $package
 }
 
 function check_software {
@@ -91,11 +105,9 @@ function install_softwares {
   check_software tmux
   check_software vim
   check_software python3
-  if [[ $uname_os = "Darwin" ]]; then    # macOS only:
-    check_software nvim
-  elif [[ $uname_os = "Linux" ]]; then   # Linux only:
-    check_software python3-pip
-    check_software neovim
+  check_software nvim
+  if [[ $os = "linux" ]]; then
+    check_software pip3
   fi
   pip3 install --user --upgrade pynvim
   check_software ruby
@@ -166,6 +178,7 @@ function fix_permissions {
 }
 
 function main {
+  check_os
   echo "This script will attempt install and setup (neo-)vim, tmux & zsh on your device."
   if yn_prompt "Are you cool with that?"; then
     echo ""
