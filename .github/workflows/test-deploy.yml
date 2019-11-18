@@ -1,0 +1,40 @@
+name: Test deploy.sh
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [ macos-latest, ubuntu-latest ]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Clone from workspace into $HOME/.dotfiles
+      run: |
+        git clone --recurse-submodules "$GITHUB_WORKSPACE" "$HOME/.dotfiles"
+        cd "$HOME/.dotfiles"
+        git checkout $GITHUB_SHA
+    - name: Run initial deploy.sh (--bypass-yn-prompt)
+      env:
+        TERM: xterm-256color
+      run: "$HOME/.dotfiles/deploy.sh --bypass-yn-prompt"
+    - name: Run deploy.sh again to test handling of pre-installed apps and existing config
+      env:
+        TERM: xterm-256color
+      run: "$HOME/.dotfiles/deploy.sh --bypass-yn-prompt"
+    - name: Run non-tmux parts of zshrc_manager to export vars and source zshrc.sh and ext.sh
+      env:
+        TERM: xterm-256color
+      run: |
+        export DOTFILES="$HOME/.dotfiles"
+        export XDG_CONFIG_HOME="$HOME/.config"
+        (cd ~/.dotfiles && \
+          git pull -q && \
+          git submodule update --init --recursive -q)
+        source "$HOME/.dotfiles/zsh/zshrc.sh"
+        source "$HOME/.dotfiles/zsh/ext.sh"
+      shell: zsh {0}
+    - name: Install nvim plugins
+      run: nvim +PlugInstall +qall
