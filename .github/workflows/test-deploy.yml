@@ -39,4 +39,4 @@ jobs:
     - name: Install nvim plugins
       run: nvim +PlugInstall +qall
     - name: Run nvim
-      run: nvim
+      run: nvim +quit
