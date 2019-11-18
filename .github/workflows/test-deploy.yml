@@ -38,3 +38,5 @@ jobs:
       shell: zsh {0}
     - name: Install nvim plugins
       run: nvim +PlugInstall +qall
+    - name: Run nvim
+      run: nvim
