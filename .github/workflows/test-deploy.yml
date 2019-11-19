@@ -38,5 +38,7 @@ jobs:
       shell: zsh {0}
     - name: Install nvim plugins
       run: nvim +PlugInstall +qall
-    - name: Run nvim
-      run: nvim +PlugInstall +quit +quit
+    - name: Run nvim 1s
+      run: timeout 1s nvim
+    - name: Run nvim 2s
+      run: timeout 2s nvim
