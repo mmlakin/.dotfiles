@@ -38,13 +38,5 @@ jobs:
       shell: zsh {0}
     - name: Install nvim plugins
       run: nvim +PlugInstall +qall
-    - name: Run nvim 1s
-      run: |
-        if [[ $(uname -s) = 'Linux' ]]; then
-          timeout 1s nvim
-        fi
-    - name: Run nvim 2s
-      run: |
-        if [[ $(uname -s) = 'Linux' ]]; then
-          timeout 2s nvim
-        fi
+    - name: Run nvim checks
+      run: nvim +PlugStatus +UpdateRemotePlugins +checkhealth +qall
