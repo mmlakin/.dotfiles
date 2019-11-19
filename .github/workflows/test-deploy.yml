@@ -39,6 +39,12 @@ jobs:
     - name: Install nvim plugins
       run: nvim +PlugInstall +qall
     - name: Run nvim 1s
-      run: timeout 1s nvim
+      run: |
+        if [[ $(uname -s) = 'Linux' ]]; then
+          timeout 1s nvim
+        fi
     - name: Run nvim 2s
-      run: timeout 2s nvim
+      run: |
+        if [[ $(uname -s) = 'Linux' ]]; then
+          timeout 2s nvim
+        fi
