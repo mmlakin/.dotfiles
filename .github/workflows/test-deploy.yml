@@ -37,8 +37,12 @@ jobs:
         source "$HOME/.dotfiles/zsh/ext.sh"
       shell: zsh {0}
     - name: Install nvim plugins
+      env:
+        TERM: xterm-256color
       run: nvim +PlugInstall +UpdateRemotePlugins +qall
     - name: Run nvim checkhealth
+      env:
+        TERM: xterm-256color
       run: |
         echo "orig"
         nvim +checkhealth +qall
