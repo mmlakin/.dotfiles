@@ -37,9 +37,6 @@ jobs:
         source "$HOME/.dotfiles/zsh/ext.sh"
       shell: zsh {0}
     - name: Install nvim plugins
-      run: nvim +PlugInstall +qall
-    - name: Run nvim checks
-      run: |
-        nvim +PlugStatus +qall
-        nvim +UpdateRemotePlugins +qall
-        nvim +checkhealth +qall
+      run: nvim +PlugInstall +UpdateRemotePlugins +qall
+    - name: Run nvim checkhealth
+      run: nvim +checkhealth +qall
