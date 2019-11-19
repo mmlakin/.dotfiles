@@ -37,5 +37,5 @@ jobs:
       run: |
         nvim +PlugStatus +qall
         nvim +checkhealth +qall
-        nvim +checkhealth nvim +qall
-        nvim +checkhealth provider +qall
+        nvim '+checkhealth nvim' +qall
+        nvim '+checkhealth provider' +qall
