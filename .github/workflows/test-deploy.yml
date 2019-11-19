@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ macos-latest, ubuntu-latest ]
+        platform: [ macos-latest, ubuntu-latest, ubuntu-16.0]
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -39,4 +39,12 @@ jobs:
     - name: Install nvim plugins
       run: nvim +PlugInstall +UpdateRemotePlugins +qall
     - name: Run nvim checkhealth
-      run: nvim +checkhealth +qall
+      run: |
+        echo "orig"
+        nvim +checkhealth +qall
+        echo "space nvim"
+        nvim '+checkhealth nvim' +qall
+        echo "checkhealth - plugstatus"
+        nvim +checkhealth +PlugStatus +qall
+
+
