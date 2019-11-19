@@ -1,4 +1,4 @@
-name: Test deploy.sh
+name: CI
 
 on: [push, pull_request]
 
@@ -17,11 +17,11 @@ jobs:
         git clone --recurse-submodules "$GITHUB_WORKSPACE" "$HOME/.dotfiles"
         cd "$HOME/.dotfiles"
         git checkout $GITHUB_SHA
-    - name: Run initial deploy.sh (--bypass-yn-prompt)
+    - name: Run initial deploy.sh
       run: "$HOME/.dotfiles/deploy.sh --bypass-yn-prompt"
-    - name: Run deploy.sh again to test handling of pre-installed apps and existing config
+    - name: Run deploy.sh again
       run: "$HOME/.dotfiles/deploy.sh --bypass-yn-prompt"
-    - name: Run non-tmux parts of zshrc_manager to export vars and source zshrc.sh and ext.sh
+    - name: Export vars, update submodules, and source zshrc.sh and ext.sh
       run: |
         export DOTFILES="$HOME/.dotfiles"
         export XDG_CONFIG_HOME="$HOME/.config"
@@ -33,11 +33,8 @@ jobs:
       shell: zsh {0}
     - name: Install nvim plugins
       run: nvim +PlugInstall +UpdateRemotePlugins +qall
-    - name: Run nvim checkhealth
+    - name: Run nvim checks
       run: |
-        echo "orig"
+        nvim +PlugStatus +qall
         nvim +checkhealth +qall
-        echo "space nvim"
-        nvim '+checkhealth nvim' +qall
-        echo "checkhealth - plugstatus"
-        nvim +checkhealth +PlugStatus +qall
+        nvim '+checkhealth nvim provider' +qall
