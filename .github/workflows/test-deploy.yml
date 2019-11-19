@@ -6,7 +6,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        platform: [ macos-latest, ubuntu-latest, ubuntu-16.0]
+        platform: [ macos-latest, ubuntu-latest, ]
     runs-on: ${{ matrix.platform }}
     env:
       TERM: xterm-256color
@@ -21,7 +21,7 @@ jobs:
       run: "$HOME/.dotfiles/deploy.sh --bypass-yn-prompt"
     - name: Run deploy.sh again
       run: "$HOME/.dotfiles/deploy.sh --bypass-yn-prompt"
-    - name: Export vars, update submodules, and source zshrc.sh and ext.sh
+    - name: Export vars and source zshrc.sh and ext.sh
       run: |
         export DOTFILES="$HOME/.dotfiles"
         export XDG_CONFIG_HOME="$HOME/.config"
@@ -37,4 +37,5 @@ jobs:
       run: |
         nvim +PlugStatus +qall
         nvim +checkhealth +qall
-        nvim '+checkhealth nvim provider' +qall
+        nvim +checkhealth nvim +qall
+        nvim +checkhealth provider +qall
