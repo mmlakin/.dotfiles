@@ -39,6 +39,9 @@ endfunction
 set runtimepath^=~/.vim/plugin
 set runtimepath^=~/.opam/system/share/ocp-indent/vim
 call plug#begin('~/.vim/plugged')
+  " plist editing
+  Plug 'darfink/vim-plist'
+
   " quote/bracket/tags
   Plug 'tpope/vim-surround'
 
