@@ -1,7 +1,4 @@
-" a nice lil' (neo)vim config
-" (requires python3 install)
-
-" safety first
+" prevent rc files from auto running dangerous cmds
 set secure
 
 " install vim plug if not installed
@@ -11,53 +8,27 @@ if empty(glob('~/.vim/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall!
 endif
 
-" project root
-function! FindGitRoot()
-  return system('git rev-parse --show-toplevel 2> /dev/null')[:-2]
-endfunction
-
-" file cleanup
-function! StripTrailingWhitespace()
-  if exists('b:noStripWhitespace')
-    return
-  endif
-  %s/\s\+$//e
-endfunction
-
-" `dd` removes line in quickfix window
-function! RemoveQFItem()
-  let curqfidx = line('.') - 1
-  let qfall = getqflist()
-  call remove(qfall, curqfidx)
-  call setqflist(qfall, 'r')
-  execute curqfidx + 1 . "cfirst"
-  copen
-endfunction
-
-
-"""""""""""""""""""""""" PLUGINS
-set runtimepath^=~/.vim/plugin
-set runtimepath^=~/.opam/system/share/ocp-indent/vim
+" PLUGINS
 call plug#begin('~/.vim/plugged')
   " plist editing
   Plug 'darfink/vim-plist'
 
-  " quote/bracket/tags
+ " change/delete/add surrounding quotes/brackets/tags/etc.
   Plug 'tpope/vim-surround'
 
-  " autoclose
+  " automatically add closing brackets/parenthesis while typing
   Plug 'townk/vim-autoclose'
 
-  " commenting
+  " commenting lines using gc
   Plug 'tomtom/tcomment_vim'
-
-  " isolated view
+ 
+  " narrow region view, open selection in a new window for editing
   Plug 'chrisbra/NrrwRgn'
 
-  " highlighting
+  " use rainbow colors for nested parens and brackets
   Plug 'kien/rainbow_parentheses.vim'
 
-  " git gutter
+  " git +/- signs and cmds for hunk staging and previewing and folding
   Plug 'airblade/vim-gitgutter'
 
   " git fugitive & line helpers
@@ -88,18 +59,6 @@ call plug#begin('~/.vim/plugged')
   " supertab (for autocompletion)
   Plug 'ervandew/supertab'
 
-  " autocompletion
-  if has('nvim')
-    silent !pip3 install pynvim
-    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-    " Plug 'fishbullet/deoplete-ruby'
-  else
-    silent !pip3 install pynvim
-    Plug 'Shougo/deoplete.nvim'
-    Plug 'roxma/nvim-yarp'
-    Plug 'roxma/vim-hug-neovim-rpc'
-  endif
-
   " python
   Plug 'davidhalter/jedi-vim'
 
@@ -124,11 +83,6 @@ call plug#begin('~/.vim/plugged')
 
 call plug#end()
 
-" allow autocompletion on all filetypes except txt
-let g:deoplete#enable_at_startup=1
-augroup deoplete_configs
-  autocmd FileType tex call deoplete#custom#buffer_option('auto_complete', v:false)
-augroup END
 " Enter maps to completion
 let g:SuperTabCrMapping = 1
 let g:SuperTabDefaultCompletionType = "<c-n>"
@@ -162,7 +116,7 @@ augroup END
 
 " rainbow parentheses
 augroup parentheses_configs
-  autocmd VimEnter * RainbowParenthesesToggle
+  autocmd VimEnter * RainbowParenthesesToggleAll
   autocmd Syntax * RainbowParenthesesLoadRound
   autocmd Syntax * RainbowParenthesesLoadSquare
   autocmd Syntax * RainbowParenthesesLoadBraces
@@ -279,15 +233,10 @@ set shiftwidth=2
 set expandtab
 " automatic config on filetype
 augroup filetype_configs
-  " ... not for makefiles tho
-  autocmd FileType make setlocal noexpandtab
-  autocmd FileType makefile setlocal noexpandtab
   " .txt
   autocmd FileType text setlocal autoindent expandtab softtabstop=2
-  " .help
-  autocmd FileType help setlocal nospell
-  " turn off autocomment
-  autocmd FileType * set fo-=r fo-=o
+  " turn off autocomment and enable auto-format of comment paragraphs
+  autocmd FileType * set fo-=r fo-=o fo+=a
 augroup END
 
 " split panes lookin nice
@@ -296,7 +245,6 @@ set fillchars=vert:\
 set splitbelow
 set splitright
 
-" colors in this bitch
 syntax on
 highlight LineNr ctermfg=yellow
 highlight Comment ctermfg=grey
@@ -329,7 +277,7 @@ highlight link vimrc_todo Todo
 augroup sys_tasks
   " remove trailing space on save unless b:noStripWhitespace
   autocmd FileType vim let b:noStripWhitespace=1
-  autocmd BufWritePre * call StripTrailingWhitespace()
+  " autocmd BufWritePre * call StripTrailingWhitespace()
   " resize splits on window resize
   autocmd VimResized * wincmd =
 augroup END
@@ -344,6 +292,9 @@ augroup END
 """""""""""""""""""""""" MACROS + REMAPS
 " leader key
 let g:mapleader = "\<SPACE>"
+
+" paste and save clipboard to registers x and y
+nnoremap <Leader>p :let @x=@* \| let @y=@+ \| put<CR>
 
 " F2 key shows tabs and trailing chars
 nnoremap <F2> :<C-U>setlocal lcs=tab:>-,trail:-,eol:$ list! list? <CR>
@@ -373,12 +324,6 @@ nnoremap zz :tabedit %<CR>
 
 " press spacebar to remove highlight from current search
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
-
-" search for word under the cursor from git root
-nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
-" bind "\" and Ag to grep -> ag shortcut from project root
-command! -nargs=1 Ag execute "Ack! <args> " . FindGitRoot()
-nnoremap \ :Ag -i<SPACE>
 
 " open file path in a split
 nnoremap vgf <C-W>v<C-W>lgf
